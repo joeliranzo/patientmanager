@@ -46,4 +46,12 @@ public class PatientsController(IPatientService service) : ControllerBase
         var deleted = await service.DeleteAsync(id);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] PatientQueryParametersDto parameters)
+    {
+        var result = await service.QueryAsync(parameters);
+        return Ok(result);
+    }
+
 }

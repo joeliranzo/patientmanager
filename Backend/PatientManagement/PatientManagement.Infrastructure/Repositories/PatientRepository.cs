@@ -7,15 +7,15 @@ using PatientManagement.Domain.Entities;
 using PatientManagement.Infrastructure.Data;
 using PatientManagement.Infrastructure.Mappings;
 using PatientManagement.Infrastructure.Security;
+using System.Collections.Generic;
 using System.Data;
-
-namespace PatientManagement.Infrastructure.Repositories;
+using System.Linq;
+using System.Threading.Tasks;
 
 public class PatientRepository(
     IDbConnectionFactory dbConnectionFactory,
     IEncryptionService encryptionService) : IPatientRepository
 {
-    #region Repository Core - Functionalities
     public async Task<Patient?> GetByIdAsync(int id)
     {
         using var connection = dbConnectionFactory.CreateConnection();
@@ -35,7 +35,7 @@ public class PatientRepository(
     public async Task<int> CreateAsync(Patient patient)
     {
         using var connection = dbConnectionFactory.CreateConnection();
-        var data = MapToDataModel(patient);
+        var data = patient.ToDataModel(encryptionService);
         const string sql = @"
             INSERT INTO patients (
                 first_name,
@@ -89,57 +89,57 @@ public class PatientRepository(
         return await connection.ExecuteAsync(sql, new { Id = id }) > 0;
     }
 
-    #endregion
-
-    #region Mapping - Utilities
-
-    private Patient MapToDomain(PatientDataModel model)
+    public async Task<IEnumerable<Patient>> QueryAsync(PatientQueryParametersDto parameters)
     {
-        return new Patient
+        using var connection = dbConnectionFactory.CreateConnection();
+
+        var filters = new List<string>();
+        var sqlParams = new DynamicParameters();
+
+        if (!string.IsNullOrWhiteSpace(parameters.FirstName))
         {
-            Id = model.Id,
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            DateOfBirth = model.DateOfBirth,
-            SocialSecurityNumber = encryptionService.DecryptToString(model.SocialSecurityNumberEncrypted),
-            Address = model.Address,
-            PhoneNumber = model.PhoneNumber,
-            Email = model.Email,
-            CreatedDate = model.CreatedDate,
-            ModifiedDate = model.ModifiedDate
-        };
-    }
+            filters.Add("first_name LIKE @FirstName");
+            sqlParams.Add("FirstName", $"%{parameters.FirstName}%");
+        }
 
-    private object MapToDataModel(Patient patient)
-    {
-        return new
+        if (!string.IsNullOrWhiteSpace(parameters.LastName))
         {
-            patient.Id,
-            patient.FirstName,
-            patient.LastName,
-            patient.DateOfBirth,
-            SocialSecurityNumberEncrypted = encryptionService.EncryptToBytes(patient.SocialSecurityNumber),
-            patient.Address,
-            patient.PhoneNumber,
-            patient.Email,
-            patient.CreatedDate,
-            patient.ModifiedDate
+            filters.Add("last_name LIKE @LastName");
+            sqlParams.Add("LastName", $"%{parameters.LastName}%");
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.Email))
+        {
+            filters.Add("email LIKE @Email");
+            sqlParams.Add("Email", $"%{parameters.Email}%");
+        }
+
+        var whereClause = filters.Count != 0 ? "WHERE " + string.Join(" AND ", filters) : "";
+
+        var sortBy = parameters.SortBy?.ToLower() switch
+        {
+            "first_name" or "last_name" or "email" or "created_date" or "modified_date" => parameters.SortBy,
+            _ => "created_date"
         };
+
+        var sortOrder = parameters.SortOrder?.ToLower() == "asc" ? "ASC" : "DESC";
+
+        var offset = (parameters.Page - 1) * parameters.PageSize;
+
+        var sql = $@"
+            SELECT 
+                id, first_name, last_name, date_of_birth, social_security_number_encrypted,
+                address, phone_number, email, created_date, modified_date
+            FROM patients
+            {whereClause}
+            ORDER BY {sortBy} {sortOrder}
+            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+        sqlParams.Add("Offset", offset);
+        sqlParams.Add("PageSize", parameters.PageSize);
+
+        var result = await connection.QueryAsync<PatientDataModel>(sql, sqlParams);
+        return result.Select(p => p.ToDomain(encryptionService));
     }
 
-    private class PatientDataModel
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = default!;
-        public string LastName { get; set; } = default!;
-        public DateTime DateOfBirth { get; set; }
-        public byte[] SocialSecurityNumberEncrypted { get; set; } = default!;
-        public string? Address { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ModifiedDate { get; set; }
-    }
-
-    #endregion
 }

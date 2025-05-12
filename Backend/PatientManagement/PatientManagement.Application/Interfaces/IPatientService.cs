@@ -9,4 +9,7 @@ public interface IPatientService
     Task<int> CreateAsync(CreatePatientRequestDto dto);
     Task<bool> UpdateAsync(int id, UpdatePatientRequestDto dto);
     Task<bool> DeleteAsync(int id);
+
+    Task<IEnumerable<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters);
+
 }
