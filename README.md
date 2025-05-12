@@ -88,6 +88,7 @@ Password: 123456
 | ------ | ------------------------ | --------- | --------------------------- |
 | POST   | `/api/auth/login`      | ❌ Public | Get JWT token               |
 | POST   | `/api/auth/register`   | ❌ Public | Register a new user         |
+| POST   | /api/auth/refresh        | ❌ Public | Generate Refresh Token      |
 | GET    | `/api/patients`        | ✅ Token  | Get all patients            |
 | GET    | `/api/patients/{id}`   | ✅ Token  | Get patient by ID           |
 | GET    | `/api/patients/search` | ✅ Token  | Filtered/paged patient list |

@@ -1,3 +1,9 @@
-﻿namespace PatientManagement.Application.DTOs.User;
+﻿using System.Text.Json.Serialization;
 
-public record RefreshRequestDto(string RefreshToken);
+namespace PatientManagement.Application.DTOs.User;
+
+public class RefreshRequestDto
+{
+    [JsonPropertyName("refresh_token")]
+    public string RefreshToken { get; set; } = null!;
+}

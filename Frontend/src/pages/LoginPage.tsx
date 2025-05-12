@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button, Form, Input, Typography, message, Card } from "antd";
-import axios from "axios";
-import config from "../config";
+import apiClient from "../services/apiClient";
 
 interface LoginProps {
   onLogin: () => void;
@@ -13,13 +12,11 @@ export default function LoginPage({ onLogin }: LoginProps) {
   const handleLogin = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      const res = await axios.post(
-        `${config.apiBaseUrl}/api/auth/login`,
-        values
-      );
-      sessionStorage.setItem("token", res.data.token);
-      sessionStorage.setItem("refreshToken", res.data.refreshToken);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      const res = await apiClient.post("/auth/login", values);
+      const { token, refresh_token } = res.data;
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("refreshToken", refresh_token);
+      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       onLogin();
     } catch {
       message.error("Invalid email or password");

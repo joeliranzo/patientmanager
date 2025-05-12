@@ -1,4 +1,3 @@
-import axios from "axios";
 import config from "../config";
 import apiClient from "./apiClient";
 
@@ -54,4 +53,4 @@ export const createPatient = (data: CreatePatientRequest) => apiClient.post<numb
 export const updatePatient = (id: number, data: UpdatePatientRequest) => apiClient.put(`${API_BASE}/${id}`, data);
 export const deletePatient = (id: number) => apiClient.delete(`${API_BASE}/${id}`);
 export const queryPatients = (params: PatientQueryParams) => 
-  axios.get<PagedResult<Patient>>(`${API_BASE}/search`, { params });
+  apiClient.get<PagedResult<Patient>>(`${API_BASE}/search`, { params });

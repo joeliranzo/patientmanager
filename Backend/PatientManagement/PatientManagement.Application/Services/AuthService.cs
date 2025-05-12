@@ -61,11 +61,11 @@ public class AuthService(
         var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
+            Subject = new ClaimsIdentity(
+            [
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
-            }),
+            ]),
             Expires = DateTime.UtcNow.AddMinutes(2),
             Issuer = config["Jwt:Issuer"],
             Audience = config["Jwt:Audience"],
