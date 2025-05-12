@@ -1,5 +1,6 @@
 import axios from "axios";
 import config from "../config";
+import apiClient from "./apiClient";
 
 export interface Patient {
   id: number;
@@ -47,10 +48,10 @@ export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {}
 
 const API_BASE = `${config.apiBaseUrl}/api/patients`;
 
-export const getPatients = () => axios.get<Patient[]>(API_BASE);
-export const getPatient = (id: number) => axios.get<Patient>(`${API_BASE}/${id}`);
-export const createPatient = (data: CreatePatientRequest) => axios.post<number>(API_BASE, data);
-export const updatePatient = (id: number, data: UpdatePatientRequest) => axios.put(`${API_BASE}/${id}`, data);
-export const deletePatient = (id: number) => axios.delete(`${API_BASE}/${id}`);
+export const getPatients = () => apiClient.get<Patient[]>(API_BASE);
+export const getPatient = (id: number) => apiClient.get<Patient>(`${API_BASE}/${id}`);
+export const createPatient = (data: CreatePatientRequest) => apiClient.post<number>(API_BASE, data);
+export const updatePatient = (id: number, data: UpdatePatientRequest) => apiClient.put(`${API_BASE}/${id}`, data);
+export const deletePatient = (id: number) => apiClient.delete(`${API_BASE}/${id}`);
 export const queryPatients = (params: PatientQueryParams) => 
   axios.get<PagedResult<Patient>>(`${API_BASE}/search`, { params });

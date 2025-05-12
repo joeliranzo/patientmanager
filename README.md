@@ -67,6 +67,12 @@ npm install
 npm run dev
 ```
 
+### Delete existing Database
+
+```
+sqlcmd -S "(localdb)\MSSQLLocalDB" -Q "ALTER DATABASE PatientManagementDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE PatientManagementDB;"
+```
+
 ---
 
 ## 🔑 Default Login

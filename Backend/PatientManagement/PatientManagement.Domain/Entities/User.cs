@@ -6,5 +6,7 @@ public class User
     public string Email { get; set; } = default!;
     public string PasswordHash { get; set; } = default!;
     public string Role { get; set; } = "User";
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }

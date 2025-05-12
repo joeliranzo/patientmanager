@@ -13,9 +13,12 @@ export default function LoginPage({ onLogin }: LoginProps) {
   const handleLogin = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-	  const API_BASE = `${config.apiBaseUrl}/api/patients`;
-      const res = await axios.post(`${API_BASE}/api/auth/login`, values);
+      const res = await axios.post(
+        `${config.apiBaseUrl}/api/auth/login`,
+        values
+      );
       sessionStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("refreshToken", res.data.refreshToken);
       axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
       onLogin();
     } catch {

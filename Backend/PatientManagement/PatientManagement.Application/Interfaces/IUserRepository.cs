@@ -4,8 +4,9 @@ namespace PatientManagement.Application.Interfaces;
 
 public interface IUserRepository
 {
+    Task<User?> GetByEmailAsync(string email);
+    Task<User?> GetByRefreshTokenAsync(string refreshToken);
     Task<bool> EmailExistsAsync(string email);
     Task<int> CreateAsync(User user);
-    Task<User?> GetByEmailAsync(string email);
-
+    Task UpdateAsync(User user);
 }

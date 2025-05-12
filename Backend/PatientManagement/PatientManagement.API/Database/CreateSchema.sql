@@ -12,10 +12,12 @@ CREATE TABLE patients (
 );
 
 CREATE TABLE users (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    email NVARCHAR(100) NOT NULL UNIQUE,
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    email NVARCHAR(256) NOT NULL UNIQUE,
     password_hash NVARCHAR(MAX) NOT NULL,
     role NVARCHAR(50) NOT NULL DEFAULT 'User',
+    refresh_token NVARCHAR(MAX) NULL,
+    refresh_token_expiry_time DATETIME2 NULL,
     created_date DATETIME2 DEFAULT GETUTCDATE() NOT NULL,
 	modified_date DATETIME2 DEFAULT GETUTCDATE() NOT NULL
 );

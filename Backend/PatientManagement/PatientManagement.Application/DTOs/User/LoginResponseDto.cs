@@ -3,5 +3,7 @@
 public record LoginResponseDto(
     string Token,
     DateTime Expiration,
-    string Email
+    string Email,
+    string RefreshToken,
+    DateTime RefreshTokenExpiration
 );

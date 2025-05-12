@@ -8,10 +8,9 @@ namespace PatientManagement.Api.Controllers;
 [AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(
-    IAuthService authService
-    ) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
+
     // POST: /api/auth/login
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
@@ -19,7 +18,9 @@ public class AuthController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var result = await authService.LoginAsync(dto);
-        return result is null ? Unauthorized("Invalid credentials") : Ok(result);
+        return result is null
+            ? Unauthorized("Invalid credentials")
+            : Ok(result);
     }
 
     // POST: /api/auth/register
@@ -29,6 +30,20 @@ public class AuthController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var success = await authService.RegisterAsync(dto);
-        return success ? Ok("User registered.") : Conflict("Email already exists.");
+        return success
+            ? Ok("User registered.")
+            : Conflict("Email already exists.");
+    }
+
+    // POST: /api/auth/refresh
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequestDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var result = await authService.RefreshTokenAsync(dto.RefreshToken);
+        return result is null
+            ? Unauthorized("Invalid or expired refresh token")
+            : Ok(result);
     }
 }
