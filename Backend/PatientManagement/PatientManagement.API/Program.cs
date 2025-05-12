@@ -130,4 +130,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Urls.Add("https://localhost:5001");
+
 app.Run();
