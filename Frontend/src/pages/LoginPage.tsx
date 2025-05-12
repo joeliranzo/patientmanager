@@ -13,7 +13,7 @@ export default function LoginPage({ onLogin }: LoginProps) {
     setLoading(true);
     try {
       const res = await axios.post("https://localhost:5001/api/auth/login", values);
-      localStorage.setItem("token", res.data.token);
+      sessionStorage.setItem("token", res.data.token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
       onLogin();
     } catch {

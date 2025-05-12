@@ -7,7 +7,7 @@ function App() {
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setAuthenticated(true);
@@ -15,7 +15,7 @@ function App() {
   }, []);
 
   const handleLogin = () => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setAuthenticated(true);
   };
