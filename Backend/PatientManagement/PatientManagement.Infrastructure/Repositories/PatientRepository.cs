@@ -1,7 +1,11 @@
+namespace PatientManagement.Infrastructure.Repositories;
+
 using Dapper;
+using PatientManagement.Application.DTOs.Patient;
 using PatientManagement.Application.Interfaces;
 using PatientManagement.Domain.Entities;
 using PatientManagement.Infrastructure.Data;
+using PatientManagement.Infrastructure.Mappings;
 using PatientManagement.Infrastructure.Security;
 using System.Data;
 
@@ -16,22 +20,16 @@ public class PatientRepository(
     {
         using var connection = dbConnectionFactory.CreateConnection();
         const string sql = "SELECT * FROM patients WHERE id = @Id";
-
-        var data = await connection.QuerySingleOrDefaultAsync<PatientDataModel>(sql,
-            new
-            {
-                Id = id
-            });
-
-        return data is null ? null : MapToDomain(data);
+        var model = await connection.QuerySingleOrDefaultAsync<PatientDataModel>(sql, new { Id = id });
+        return model?.ToDomain(encryptionService);
     }
 
     public async Task<IEnumerable<Patient>> GetAllAsync()
     {
         using var connection = dbConnectionFactory.CreateConnection();
         const string sql = "SELECT * FROM patients";
-        var data = await connection.QueryAsync<PatientDataModel>(sql);
-        return data.Select(MapToDomain);
+        var models = await connection.QueryAsync<PatientDataModel>(sql);
+        return models.Select(m => m.ToDomain(encryptionService));
     }
 
     public async Task<int> CreateAsync(Patient patient)
@@ -39,8 +37,28 @@ public class PatientRepository(
         using var connection = dbConnectionFactory.CreateConnection();
         var data = MapToDataModel(patient);
         const string sql = @"
-            INSERT INTO patients (first_name, last_name, date_of_birth, social_security_number_encrypted, address, phone_number, email, created_date, modified_date)
-            VALUES (@FirstName, @LastName, @DateOfBirth, @SocialSecurityNumberEncrypted, @Address, @PhoneNumber, @Email, @CreatedDate, @ModifiedDate);
+            INSERT INTO patients (
+                first_name,
+                last_name,
+                date_of_birth,
+                social_security_number_encrypted,
+                address,
+                phone_number,
+                email,
+                created_date,
+                modified_date
+            )
+            VALUES (
+                @FirstName,
+                @LastName,
+                @DateOfBirth,
+                @SocialSecurityNumberEncrypted,
+                @Address,
+                @PhoneNumber,
+                @Email,
+                @CreatedDate,
+                @ModifiedDate
+            );
             SELECT CAST(SCOPE_IDENTITY() as int)";
         return await connection.ExecuteScalarAsync<int>(sql, data);
     }
@@ -48,12 +66,17 @@ public class PatientRepository(
     public async Task<bool> UpdateAsync(Patient patient)
     {
         using var connection = dbConnectionFactory.CreateConnection();
-        var data = MapToDataModel(patient);
+        var data = patient.ToDataModel(encryptionService);
         const string sql = @"
             UPDATE patients
-            SET first_name = @FirstName, last_name = @LastName, date_of_birth = @DateOfBirth,
+            SET
+                first_name = @FirstName,
+                last_name = @LastName,
+                date_of_birth = @DateOfBirth,
                 social_security_number_encrypted = @SocialSecurityNumberEncrypted,
-                address = @Address, phone_number = @PhoneNumber, email = @Email,
+                address = @Address,
+                phone_number = @PhoneNumber,
+                email = @Email,
                 modified_date = @ModifiedDate
             WHERE id = @Id";
         return await connection.ExecuteAsync(sql, data) > 0;

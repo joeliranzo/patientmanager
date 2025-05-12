@@ -1,72 +1,36 @@
 using PatientManagement.Application.DTOs.Patient;
 using PatientManagement.Application.Interfaces;
-using PatientManagement.Domain.Entities;
+using PatientManagement.Application.Mappings;
 
 namespace PatientManagement.Application.Services;
 
 public class PatientService(IPatientRepository repository) : IPatientService
 {
-    public async Task<IEnumerable<PatientResponseDto>> GetAllAsync()
-    {
-        var patients = await repository.GetAllAsync();
-        return patients.Select(MapToResponse);
-    }
+    public async Task<IEnumerable<PatientResponseDto>> GetAllAsync() =>
+        (await repository.GetAllAsync()).Select(p => p.ToResponseDto());
 
-    public async Task<PatientResponseDto?> GetByIdAsync(int id)
-    {
-        var patient = await repository.GetByIdAsync(id);
-        return patient is null ? null : MapToResponse(patient);
-    }
+    public async Task<PatientResponseDto?> GetByIdAsync(int id) =>
+        (await repository.GetByIdAsync(id))?.ToResponseDto();
 
-    public async Task<int> CreateAsync(CreatePatientRequestDto dto)
-    {
-        var patient = new Patient
-        {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            DateOfBirth = dto.DateOfBirth,
-            SocialSecurityNumber = dto.SocialSecurityNumber,
-            Address = dto.Address,
-            PhoneNumber = dto.PhoneNumber,
-            Email = dto.Email,
-            CreatedDate = DateTime.UtcNow,
-            ModifiedDate = DateTime.UtcNow
-        };
-        return await repository.CreateAsync(patient);
-    }
+    public async Task<int> CreateAsync(CreatePatientRequestDto dto) =>
+        await repository.CreateAsync(dto.ToDomain());
 
     public async Task<bool> UpdateAsync(int id, UpdatePatientRequestDto dto)
     {
         var existing = await repository.GetByIdAsync(id);
         if (existing is null) return false;
-
-        existing.FirstName = dto.FirstName ?? existing.FirstName;
-        existing.LastName = dto.LastName ?? existing.LastName;
-        existing.DateOfBirth = dto.DateOfBirth ?? existing.DateOfBirth;
-        existing.SocialSecurityNumber = dto.SocialSecurityNumber ?? existing.SocialSecurityNumber;
-        existing.Address = dto.Address ?? existing.Address;
-        existing.PhoneNumber = dto.PhoneNumber ?? existing.PhoneNumber;
-        existing.Email = dto.Email ?? existing.Email;
+        dto.ApplyUpdate(existing);
         existing.ModifiedDate = DateTime.UtcNow;
-
         return await repository.UpdateAsync(existing);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id) =>
+        await repository.DeleteAsync(id);
+
+    public async Task<IEnumerable<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters)
     {
-        return await repository.DeleteAsync(id);
+        var patients = await repository.QueryAsync(parameters);
+        return patients.Select(p => p.ToResponseDto());
     }
 
-    private PatientResponseDto MapToResponse(Patient patient) => new(
-        patient.Id,
-        patient.FirstName,
-        patient.LastName,
-        patient.DateOfBirth.ToString("yyyy-MM-dd"),
-        patient.SocialSecurityNumber,
-        patient.Address,
-        patient.PhoneNumber,
-        patient.Email,
-        patient.CreatedDate,
-        patient.ModifiedDate
-    );
 }
