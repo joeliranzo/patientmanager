@@ -7,8 +7,8 @@ export default function ProtectedApp() {
   const [refresh, setRefresh] = useState(false);
 
   return (
-    <div>
-      <h1>Patient Manager</h1>
+    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <h1 style={{ textAlign: "center" }}>Patient Manager</h1>
       <PatientForm patientId={editId} onSaved={() => { setEditId(null); setRefresh(!refresh); }} />
       <PatientList onEdit={(id: number) => setEditId(id)} key={refresh ? "refresh-true" : "refresh-false"} />
     </div>
