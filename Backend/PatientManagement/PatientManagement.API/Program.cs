@@ -7,11 +7,16 @@ using PatientManagement.Infrastructure.Data;
 using PatientManagement.Infrastructure.Repositories;
 using PatientManagement.Infrastructure.Security;
 using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -90,6 +95,7 @@ builder.Services.AddCors(options =>
 
 await DatabaseInitializer.EnsureDatabaseCreatedAsync(builder.Configuration);
 
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var app = builder.Build();
 
