@@ -1,5 +1,6 @@
 ﻿using Moq;
 using PatientManagement.Application.DTOs.Patient;
+using PatientManagement.Application.DTOs.Shared;
 using PatientManagement.Application.Interfaces;
 using PatientManagement.Application.Services;
 using PatientManagement.Domain.Entities;
@@ -75,5 +76,62 @@ public class PatientServiceTests
         var result = await service.UpdateAsync(1, updateDto);
 
         Assert.True(result);
+    }
+
+    [Fact]
+    public async Task QueryAsync_ReturnsFilteredPagedResults()
+    {
+        // Arrange
+        var samplePatients = new List<Patient>
+        {
+            new() {
+                Id = 1,
+                FirstName = "Alice",
+                LastName = "Smith",
+                Email = "alice@mail.com",
+                SocialSecurityNumber = "123-45-6789",
+                DateOfBirth = new DateTime(1990, 1, 1),
+                CreatedDate = DateTime.UtcNow,
+                ModifiedDate = DateTime.UtcNow
+            },
+            new() {
+                Id = 2,
+                FirstName = "Bob",
+                LastName = "Brown",
+                Email = "bob@mail.com",
+                SocialSecurityNumber = "987-65-4321",
+                DateOfBirth = new DateTime(1985, 5, 5),
+                CreatedDate = DateTime.UtcNow,
+                ModifiedDate = DateTime.UtcNow
+            }
+        };
+
+        var pagedResult = new PagedResult<Patient>
+        {
+            Items = samplePatients,
+            TotalCount = 2,
+            Page = 1,
+            PageSize = 10
+        };
+
+        var mockRepo = new Mock<IPatientRepository>();
+        mockRepo.Setup(r => r.QueryAsync(It.IsAny<PatientQueryParametersDto>()))
+                .ReturnsAsync(pagedResult);
+
+        var service = new PatientService(mockRepo.Object);
+
+        // Act
+        var result = await service.QueryAsync(new PatientQueryParametersDto
+        {
+            FirstName = "A",
+            Page = 1,
+            PageSize = 10
+        });
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.All(result.Items, p => Assert.False(string.IsNullOrWhiteSpace(p.FirstName)));
     }
 }
