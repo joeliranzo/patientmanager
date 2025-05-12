@@ -1,4 +1,5 @@
 import axios from "axios";
+import config from "../config";
 
 export interface Patient {
   id: number;
@@ -44,7 +45,7 @@ export interface PatientQueryParams {
 
 export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {}
 
-const API_BASE = "https://localhost:5001/api/patients";
+const API_BASE = `${config.apiBaseUrl}/api/patients`;
 
 export const getPatients = () => axios.get<Patient[]>(API_BASE);
 export const getPatient = (id: number) => axios.get<Patient>(`${API_BASE}/${id}`);

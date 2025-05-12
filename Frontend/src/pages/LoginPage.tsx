@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Form, Input, Typography, message, Card } from "antd";
 import axios from "axios";
+import config from "../config";
 
 interface LoginProps {
   onLogin: () => void;
@@ -12,7 +13,8 @@ export default function LoginPage({ onLogin }: LoginProps) {
   const handleLogin = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      const res = await axios.post("https://localhost:5001/api/auth/login", values);
+	  const API_BASE = `${config.apiBaseUrl}/api/patients`;
+      const res = await axios.post(`${API_BASE}/api/auth/login`, values);
       sessionStorage.setItem("token", res.data.token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
       onLogin();
