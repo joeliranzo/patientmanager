@@ -59,10 +59,6 @@ dotnet run
 
 > Ensure `appsettings.json` has a valid DB connection and encryption key.
 
-### Database
-
-- Run `Database/CreateSchema.sql` in your local SQL Server instance.
-
 ### Frontend Setup
 
 ```bash
