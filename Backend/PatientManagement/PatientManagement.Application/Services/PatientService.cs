@@ -1,4 +1,5 @@
 using PatientManagement.Application.DTOs.Patient;
+using PatientManagement.Application.DTOs.Shared;
 using PatientManagement.Application.Interfaces;
 using PatientManagement.Application.Mappings;
 
@@ -27,10 +28,18 @@ public class PatientService(IPatientRepository repository) : IPatientService
     public async Task<bool> DeleteAsync(int id) =>
         await repository.DeleteAsync(id);
 
-    public async Task<IEnumerable<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters)
+    public async Task<PagedResult<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters)
     {
-        var patients = await repository.QueryAsync(parameters);
-        return patients.Select(p => p.ToResponseDto());
+        var result = await repository.QueryAsync(parameters);
+
+        return new PagedResult<PatientResponseDto>
+        {
+            Items = result.Items.Select(p => p.ToResponseDto()),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            PageSize = result.PageSize
+        };
     }
+
 
 }

@@ -2,6 +2,7 @@ namespace PatientManagement.Infrastructure.Repositories;
 
 using Dapper;
 using PatientManagement.Application.DTOs.Patient;
+using PatientManagement.Application.DTOs.Shared;
 using PatientManagement.Application.Interfaces;
 using PatientManagement.Domain.Entities;
 using PatientManagement.Infrastructure.Data;
@@ -89,7 +90,7 @@ public class PatientRepository(
         return await connection.ExecuteAsync(sql, new { Id = id }) > 0;
     }
 
-    public async Task<IEnumerable<Patient>> QueryAsync(PatientQueryParametersDto parameters)
+    public async Task<PagedResult<Patient>> QueryAsync(PatientQueryParametersDto parameters)
     {
         using var connection = dbConnectionFactory.CreateConnection();
 
@@ -123,10 +124,12 @@ public class PatientRepository(
         };
 
         var sortOrder = parameters.SortOrder?.ToLower() == "asc" ? "ASC" : "DESC";
-
         var offset = (parameters.Page - 1) * parameters.PageSize;
 
-        var sql = $@"
+        var countSql = $"SELECT COUNT(*) FROM patients {whereClause}";
+        var totalCount = await connection.ExecuteScalarAsync<int>(countSql, sqlParams);
+
+        var dataSql = $@"
             SELECT 
                 id, first_name, last_name, date_of_birth, social_security_number_encrypted,
                 address, phone_number, email, created_date, modified_date
@@ -138,8 +141,15 @@ public class PatientRepository(
         sqlParams.Add("Offset", offset);
         sqlParams.Add("PageSize", parameters.PageSize);
 
-        var result = await connection.QueryAsync<PatientDataModel>(sql, sqlParams);
-        return result.Select(p => p.ToDomain(encryptionService));
-    }
+        var data = await connection.QueryAsync<PatientDataModel>(dataSql, sqlParams);
+        var patients = data.Select(p => p.ToDomain(encryptionService));
 
+        return new PagedResult<Patient>
+        {
+            Items = patients,
+            TotalCount = totalCount,
+            Page = parameters.Page,
+            PageSize = parameters.PageSize
+        };
+    }
 }

@@ -43,8 +43,8 @@ export default function PatientList({ onEdit }: Props) {
         sort_by: sorter.field,
         sort_order: sorter.order === "ascend" ? "asc" : "desc"
       });
-      setData(res.data);
-      setTotal(parseInt(res.headers["x-total-count"] || "0"));
+      setData(res.data.items);
+      setTotal(res.data.total_count);
     } catch {
       message.error("Failed to load patients");
     } finally {

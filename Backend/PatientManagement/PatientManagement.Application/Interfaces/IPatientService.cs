@@ -1,4 +1,5 @@
 using PatientManagement.Application.DTOs.Patient;
+using PatientManagement.Application.DTOs.Shared;
 
 namespace PatientManagement.Application.Interfaces;
 
@@ -10,6 +11,5 @@ public interface IPatientService
     Task<bool> UpdateAsync(int id, UpdatePatientRequestDto dto);
     Task<bool> DeleteAsync(int id);
 
-    Task<IEnumerable<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters);
-
+    Task<PagedResult<PatientResponseDto>> QueryAsync(PatientQueryParametersDto parameters);
 }

@@ -23,6 +23,15 @@ export interface CreatePatientRequest {
   email?: string;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+
 export interface PatientQueryParams {
   first_name?: string;
   last_name?: string;
@@ -42,5 +51,5 @@ export const getPatient = (id: number) => axios.get<Patient>(`${API_BASE}/${id}`
 export const createPatient = (data: CreatePatientRequest) => axios.post<number>(API_BASE, data);
 export const updatePatient = (id: number, data: UpdatePatientRequest) => axios.put(`${API_BASE}/${id}`, data);
 export const deletePatient = (id: number) => axios.delete(`${API_BASE}/${id}`);
-export const queryPatients = (params: PatientQueryParams) =>
-  axios.get<Patient[]>(`${API_BASE}/search`, { params });
+export const queryPatients = (params: PatientQueryParams) => 
+  axios.get<PagedResult<Patient>>(`${API_BASE}/search`, { params });
