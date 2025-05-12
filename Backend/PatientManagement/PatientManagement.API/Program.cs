@@ -18,13 +18,29 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
     });
 
+//Adding global authorization -> example
+//builder.Services.AddControllers(options =>
+//{
+//    var policy = new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build();
+
+//    options.Filters.Add(new AuthorizeFilter(policy));
+//});
+
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Application & Domain services
-builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+
 
 // Infrastructure
 builder.Services.AddSingleton<IDbConnectionFactory>(_ =>

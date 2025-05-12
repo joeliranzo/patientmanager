@@ -7,6 +7,13 @@ namespace PatientManagement.Infrastructure.Repositories;
 
 public class UserRepository(IDbConnectionFactory dbConnectionFactory) : IUserRepository
 {
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        using var connection = dbConnectionFactory.CreateConnection();
+        const string sql = "SELECT id, email, password_hash, role, created_date FROM users WHERE email = @Email";
+        return await connection.QuerySingleOrDefaultAsync<User>(sql, new { Email = email.ToLower() });
+    }
+
     public async Task<bool> EmailExistsAsync(string email)
     {
         using var connection = dbConnectionFactory.CreateConnection();

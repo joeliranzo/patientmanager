@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatientManagement.Application.DTOs.Patient;
 using PatientManagement.Application.Interfaces;
 
 namespace PatientManagement.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PatientsController(IPatientService service) : ControllerBase

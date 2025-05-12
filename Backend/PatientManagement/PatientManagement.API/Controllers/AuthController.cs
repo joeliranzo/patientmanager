@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatientManagement.Application.DTOs.User;
 using PatientManagement.Application.Interfaces;
 
 namespace PatientManagement.Api.Controllers;
 
+[AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(
